@@ -5,7 +5,6 @@
 #include "NonlinearProblem.hpp"
 #include "parameters.hpp"
 
-
 __global__ void InitalisePRNGKernel( const unsigned int noReal,
                                      curandState* pGlobalState)
 {
@@ -14,6 +13,20 @@ __global__ void InitalisePRNGKernel( const unsigned int noReal,
   {
     curand_init(1337, index, 0, &pGlobalState[index]);
   }
+}
+
+__global__ void DebugKernel( const unsigned int noReal,
+                             const unsigned int noSims,
+                             const unsigned int noBeta,
+                             curandState* pGlobalState,
+                             unsigned int* pNoFinished,
+                             float* pEscapeTimes,
+                             int2* pCouplingList,
+                             float* pCouplingStrength)
+{
+  float coupling_strength = pCouplingStrength[blockIdx.x];
+  int2* p_coupling_list   = pCouplingList+blockIdx.y*noNeurons*noNeurons;
+  printf("Network no: %d, Strength index: %d, Coupling strength: %f.\n",blockIdx.y,blockIdx.x,coupling_strength);
 }
 
 __global__ void SimulateNetworkKernel( const unsigned int noReal,

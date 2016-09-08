@@ -1,6 +1,8 @@
 #include <iostream>
 #include <cstdlib>
+#include <cmath>
 #include <curand_kernel.h>
+#include <assert.h>
 #include <fstream>
 #include <sstream>
 #include "cu_error_functions.hpp"
@@ -58,6 +60,18 @@ NetworkProblem::~NetworkProblem()
 
 void NetworkProblem::SimulateNetwork()
 {
+  // Check if networks are configured
+  if (!mNetworksCreatedFlag)
+  {
+    cout << "Networks not initialised. Aborting." << endl;
+    return;
+  }
+  if (!mCouplingFlag)
+  {
+    cout << "Coupling strengths not set. Aborting." << endl;
+    return;
+  }
+
   // Reset memory
   CUDA_CALL( cudaMemset( mpNoFinished, 0, sizeof(int)));
   CUDA_CALL( cudaMemset( mpEscapeTimes, 0.0f, noNeurons*mNoSims*sizeof(float)));
@@ -66,10 +80,24 @@ void NetworkProblem::SimulateNetwork()
   InitalisePRNGKernel<<<mNoBlocks,mNoThreads>>>( mNoReal, mpGlobalState);
   CUDA_CHECK_ERROR();
 
-  cout << "Random number generator configured" << endl;
+  cout << "Random number generator configured." << endl;
+
+  // Debug
+  if (mDebug)
+  {
+    DebugKernel<<<mNoBlocks,1>>>( mNoReal,
+                                           mNoSims,
+                                           mNoBeta,
+                                           mpGlobalState,
+                                           mpNoFinished,
+                                           mpEscapeTimes,
+                                           mpCouplingList,
+                                           mpCouplingStrength);
+    CUDA_CALL( cudaDeviceSynchronize());
+  }
 
   // Actually run the network
-  cout << "Starting simulation" << endl;
+  cout << "Starting simulation..." << endl;
   SimulateNetworkKernel<<<mNoBlocks,mNoThreads>>>( mNoReal,
                                                    mNoSims,
                                                    mNoBeta,
@@ -107,6 +135,7 @@ void NetworkProblem::SetCouplingStrength( float min, float max, int npts)
 {
   float dbeta = (max-min)/(npts-1);
   float beta = min;
+  cout << beta << dbeta << endl;
 
   // Populate beta vector
   for (int i=0;i<npts;++i)
@@ -119,7 +148,16 @@ void NetworkProblem::SetCouplingStrength( float min, float max, int npts)
         mNoBeta*sizeof(float), cudaMemcpyHostToDevice));
 
   mCouplingFlag = 1;
-  cout << "Coupling strengths set." << mNoReal << endl;
+  if (mDebug)
+  {
+    cout << "Coupling strengths:";
+    for (int i=0;i<npts;++i)
+    {
+      cout << "\t" << mpHost_couplingStrength[i];
+    }
+    cout << endl;
+  }
+  cout << "Coupling strengths set." << endl;
 }
 
 void NetworkProblem::CalculateAverages()
@@ -180,14 +218,13 @@ void NetworkProblem::LoadNetworks( char* filename)
       istringstream ss(str);
       ss >> networkNo >> outputNeuron >> inputNeuron;
       AddLink( networkNo, outputNeuron, inputNeuron);
-      mpCurrentIndex[networkNo]++;
     }
   }
 
   FinishNetworks();
 
   file.close();
-  cout << "Network file loaded" << endl;
+  cout << "Network file loaded successfully." << endl;
 }
 
 void NetworkProblem::AddLink( unsigned int networkNo,
@@ -258,4 +295,9 @@ void NetworkProblem::FinishNetworks()
   mNetworksCreatedFlag = 1;
 
   cout << "Networks set." << endl;
+}
+
+void NetworkProblem::SetDebugFlag( bool val)
+{
+  mDebug = val;
 }

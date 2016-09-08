@@ -34,6 +34,9 @@ class NetworkProblem
 
     void FinishNetworks();
 
+    // For debugging
+    void SetDebugFlag( bool val);
+
   private:
 
     unsigned int mNoReal;
@@ -46,6 +49,7 @@ class NetworkProblem
     curandState* mpGlobalState;
 
     // Coupling strength
+    float* mpHost_couplingStrength;
     float* mpCouplingStrength;
     bool mCouplingFlag;
 
@@ -54,11 +58,9 @@ class NetworkProblem
     // For bookkeeping
     unsigned int* mpNoFinished;
 
-    // For coupling
+    // Coupling architecture
     int2* mpHost_couplingList;
     int2* mpCouplingList;
-    float* mpHost_couplingStrength;
-    float* mpCouplingStrength;
     int* mpCurrentIndex;
     bool mNetworksCreatedFlag;
 
@@ -71,6 +73,9 @@ class NetworkProblem
 
     // For copying back
     float* mpHost_escapeTimes;
+
+    // Debugging
+    bool mDebug;
 
     // Hide default constructor
     NetworkProblem();

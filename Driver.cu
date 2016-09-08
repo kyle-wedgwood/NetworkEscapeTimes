@@ -8,19 +8,22 @@
 int main( int argc, char* argv[])
 {
 
-  int noReal     = 1000;
-  int noNetworks = 6;
+  int noReal     = 1024;
+  int noNetworks = 13;
   int noCouplingStrengths = 10;
 
-  float beta_min = log10(-2);
-  float beta_max = log10(5);
+  float beta_min = -2.0f;
+  float beta_max = 3.0f;
   char filename[] = "networks3.dat";
 
-  Benjamin* p_network = new Benjamin( noReal, noNetworks, noCouplingStrengths);
+  NetworkProblem* p_network = new NetworkProblem( noReal, noNetworks, noCouplingStrengths);
+
+  p_network->SetDebugFlag(1);
 
   p_network->SetCouplingStrength( beta_min, beta_max, noCouplingStrengths);
 
   p_network->LoadNetworks( filename);
+
   p_network->SimulateNetwork();
 
   delete( p_network);

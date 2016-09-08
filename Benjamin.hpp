@@ -1,6 +1,8 @@
 #ifndef BENJAMINPROBLEMHEADERDEF
 #define BENJAMINPROBLEMHEADERDEF
 
+#include "NonlinearProblem.hpp"
+
 class Benjamin:
   public NonlinearProblem
 {

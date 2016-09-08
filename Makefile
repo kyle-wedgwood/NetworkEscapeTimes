@@ -5,10 +5,11 @@ LDFLAGS = -arch=compute_30 -code=sm_30 -lcurand -L/usr/local/lib -L/usr/lib
 CUINC  = -I. -dc -I/usr/local/include
 
 OBJS = Driver.o \
-			 Benjamin.o \
-		   NonlinearProblem.o \
-		   HeunSolver.o \
-	  	 CUDAKernels.o \
+       NetworkProblem.o \
+       Benjamin.o \
+       NonlinearProblem.o \
+       HeunSolver.o \
+       CUDAKernels.o
 
 all: $(OBJS)
 		$(NVCC) $(LDFLAGS) $(OBJS) -o Driver
