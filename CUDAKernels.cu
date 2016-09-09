@@ -92,6 +92,7 @@ __global__ void SimulateNetworkKernel( const unsigned int noReal,
         }
       }
       time += timestep;
+      printf("Time = %f.\n",time);
     } while (noCrossed<noNeurons);
 
     printf("Finished simulation %d of %d.", atomicAdd( pNoFinished,1)+1,noSims);
