@@ -25,7 +25,14 @@ __global__ void DebugKernel( const unsigned int noReal,
                              float* pCouplingStrength)
 {
   float coupling_strength = pCouplingStrength[blockIdx.x];
-  int2* p_coupling_list   = pCouplingList+blockIdx.y*noNeurons*noNeurons;
+  int2 p_coupling_list[noNeurons*noNeurons];
+  for (int i=0;i<noNeurons*noNeurons;++i)
+  {
+    p_coupling_list[i].x = pCouplingList[i+blockIdx.y*noNeurons*noNeurons].x;
+    p_coupling_list[i].y = pCouplingList[i+blockIdx.y*noNeurons*noNeurons].y;
+    printf("Network no: %d, Output neuron: %d, Input neuron: %d.\n" \
+        ,blockIdx.y,p_coupling_list[i].x,p_coupling_list[i].y);
+  }
   printf("Network no: %d, Strength index: %d, Coupling strength: %f.\n",blockIdx.y,blockIdx.x,coupling_strength);
 }
 
@@ -41,9 +48,19 @@ __global__ void SimulateNetworkKernel( const unsigned int noReal,
   int index = blockIdx.z * blockDim.x + threadIdx.x;
   if (index<noReal)
   {
+    __shared__ int2 p_coupling_list[noNeurons*noNeurons];
     curandState local_state = pGlobalState[index];
-    Benjamin* p_problem = new Benjamin(
-        pCouplingList+blockIdx.y*noNeurons*noNeurons, pCouplingStrength[blockIdx.x]);
+
+    // Load coupling list
+    if (threadIdx.x<noNeurons*noNeurons)
+    {
+      p_coupling_list[threadIdx.x].x =
+        pCouplingList[threadIdx.x+blockIdx.y*noNeurons*noNeurons].x;
+      p_coupling_list[threadIdx.x].y =
+        pCouplingList[threadIdx.x+blockIdx.y*noNeurons*noNeurons].y;
+    }
+    Benjamin* p_problem = new Benjamin( p_coupling_list,
+                                        pCouplingStrength[blockIdx.x]);
     HeunSolver* p_solver = new HeunSolver( timestep, local_state, p_problem);
 
     // Initialise system
