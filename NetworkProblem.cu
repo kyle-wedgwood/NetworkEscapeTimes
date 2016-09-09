@@ -228,6 +228,7 @@ void NetworkProblem::LoadNetworks( char* filename)
 
   file.close();
   cout << "Network file loaded successfully." << endl;
+
   if (mDebug)
   {
     for (int i=0;i<mNoNetworks*noNeurons*noNeurons;++i)
