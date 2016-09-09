@@ -86,13 +86,13 @@ void NetworkProblem::SimulateNetwork()
   if (mDebug)
   {
     DebugKernel<<<mNoBlocks,1>>>( mNoReal,
-                                           mNoSims,
-                                           mNoBeta,
-                                           mpGlobalState,
-                                           mpNoFinished,
-                                           mpEscapeTimes,
-                                           mpCouplingList,
-                                           mpCouplingStrength);
+                                  mNoSims,
+                                  mNoBeta,
+                                  mpGlobalState,
+                                  mpNoFinished,
+                                  mpEscapeTimes,
+                                  mpCouplingList,
+                                  mpCouplingStrength);
     CUDA_CALL( cudaDeviceSynchronize());
     cout << "Debug information displayed." << endl;
     cout << "Press return to continue." << endl;
@@ -228,6 +228,19 @@ void NetworkProblem::LoadNetworks( char* filename)
 
   file.close();
   cout << "Network file loaded successfully." << endl;
+  if (mDebug)
+  {
+    for (int i=0;i<mNoNetworks*noNeurons*noNeurons;++i)
+    {
+      cout << "Network: " << i/(noNeurons*noNeurons)
+           << ", Output neuron: " << mpHost_couplingList[i].x
+           << ", Input neuron: " << mpHost_couplingList[i].y
+           << endl;
+    }
+    cout << "Debug information displayed." << endl;
+    cout << "Press return to continue." << endl;
+    getchar();
+  }
 }
 
 void NetworkProblem::AddLink( unsigned int networkNo,
