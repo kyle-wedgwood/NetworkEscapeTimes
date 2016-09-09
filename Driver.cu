@@ -14,7 +14,8 @@ int main( int argc, char* argv[])
 
   float beta_min = -2.0f;
   float beta_max = 3.0f;
-  char filename[] = "networks3.dat";
+  char network_filename[] = "networks3.dat";
+  char escape_time_filename[] = "netork3EscapeTimes.dat";
 
   NetworkProblem* p_network = new NetworkProblem( noReal, noNetworks, noCouplingStrengths);
 
@@ -22,9 +23,11 @@ int main( int argc, char* argv[])
 
   p_network->SetCouplingStrength( beta_min, beta_max, noCouplingStrengths);
 
-  p_network->LoadNetworks( filename);
+  p_network->LoadNetworks( network_filename);
 
   p_network->SimulateNetwork();
+
+  p_network->SaveData( escape_time_filename);
 
   delete( p_network);
 
