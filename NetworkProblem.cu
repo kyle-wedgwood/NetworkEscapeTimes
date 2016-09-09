@@ -94,6 +94,9 @@ void NetworkProblem::SimulateNetwork()
                                            mpCouplingList,
                                            mpCouplingStrength);
     CUDA_CALL( cudaDeviceSynchronize());
+    cout << "Debug information displayed." << endl;
+    cout << "Press return to continue." << endl;
+    getchar();
   }
 
   // Actually run the network
